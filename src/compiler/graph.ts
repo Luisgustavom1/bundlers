@@ -10,7 +10,8 @@ export const createGraph = async (entry: string) => {
 
     type Module = {
         id: number;
-        dependencies: number[];
+        code: string;
+        dependencies: Map<string, number>;
     }
 
     const modules: Module[] = [];
@@ -31,15 +32,20 @@ export const createGraph = async (entry: string) => {
                 node.type === "ImportDeclaration"
             );
 
-        const dependencies: number[] = [];
+        const dependencies = new Map<string, number>()
         for (const node of imports) {
             const mod = await createModule(
                 path.join(path.dirname(filename), node.source.value)
             );
-            dependencies.push(mod.id);
+            dependencies.set(node.source.value, mod.id);
         };
-        
-        const mod: Module = { id, dependencies };
+
+        const { code } = await swc.transform(content, {
+            filename,
+            module: { type: "commonjs" }
+        })
+
+        const mod: Module = { id, code, dependencies };
         modules.push(mod);
         return mod;
     }
