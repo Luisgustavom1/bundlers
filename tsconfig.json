@@ -11,6 +11,6 @@
     "strict": true,
     "skipLibCheck": true,
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "example/path/to/app.js", "example/index.js", "example/index.js"],
   "exclude": ["node_modules"]
 }

@@ -21,7 +21,7 @@ export const createGraph = async (entry: string) => {
 
         const absoluteFile = 
             path.join(process.cwd(), filename) + 
-            (path.extname(filename) === "" ? ".ts" : "");
+            (path.extname(filename) === "" ? ".js" : "");
         
         const content = await readFile(absoluteFile, "utf8");
 
@@ -53,4 +53,35 @@ export const createGraph = async (entry: string) => {
     await createModule(entry);
 
     return modules;
+}
+
+export const bundle = async (entry: string) => {
+    const modules = await createGraph(entry);
+
+    const output = `
+        (function (modules) {
+            function require(id) {
+                const [fn, dependencies] = modules[id];
+                function mappedRequire(name) {
+                    return require(dependencies[name]);
+                }
+                const module = { exports: {} };
+                fn(mappedRequire, module, module.exports);
+                return module.exports;
+            }
+            require(0);
+        })({
+            ${modules.map(
+                mod => `${mod.id}: [
+                    function (require, module, exports) {
+                        ${mod.code}
+                    },
+                    ${JSON.stringify(Object.fromEntries(mod.dependencies))}
+                ]`
+            ).join(",\n")}
+        })
+    `;
+
+    const minified = await swc.minify(output, { compress: true });
+    return minified.code;
 }

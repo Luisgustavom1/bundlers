@@ -1,3 +1,7 @@
-import { createGraph } from "./compiler/graph";
+import { bundle } from "./compiler";
 
-createGraph("./example/index.ts").then(console.log)
+bundle("./example/index.js").then(code => {
+    console.log(code, '\n');
+
+    eval(code);
+})
