@@ -56,7 +56,8 @@ while(queueModules.length) {
     );
 
     const code = fs.readFileSync(module, 'utf-8');
-    const codeContent = code.match(/module\.exports\s+=\s+(.*?);/)?.[1] || '';
+    
+    const codeContent = code.match(/module\.exports\s+=\s+((.|\n|\r)*);/)?.[1] || '';
 
     const moduleData = {
         code: codeContent,
