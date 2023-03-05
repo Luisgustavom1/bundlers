@@ -1,10 +1,10 @@
-import chalk from 'chalk';
-import JestHasteMap from 'jest-haste-map';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import yargs from 'yargs';
+import fs from 'fs';
 import Resolver from 'jest-resolve';
-import { DependencyResolver } from 'jest-resolve-dependencies';
+import JestHasteMap from 'jest-haste-map';
+import chalk from 'chalk';
+import yargs from 'yargs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "cmd");
  
@@ -35,20 +35,59 @@ const resolver = new Resolver.default(moduleMap, {
     hasCoreModules: false,
     rootDir: root,
 }); 
-const dependencyResolver = new DependencyResolver(resolver, hasteFS);
 
 const allFiles = new Set();
-const queueDependencies = [entryPoint];
+const modules = new Map();
+const queueModules = [entryPoint];
 
-while(queueDependencies.length) {
-    const dependencies = queueDependencies.shift();
+while(queueModules.length) {
+    const module = queueModules.shift();
 
-    if (allFiles.has(dependencies)) continue;
+    if (allFiles.has(module)) continue;
+    allFiles.add(module);
 
-    allFiles.add(dependencies);
-    queueDependencies.push(...dependencyResolver.resolve(dependencies));
+    const dependencyMap = new Map(
+        hasteFS
+            .getDependencies(module)
+            ?.map(dependencyName => [
+                dependencyName,
+                resolver.resolveModule(module, dependencyName)
+            ])
+    );
+
+    const code = fs.readFileSync(module, 'utf-8');
+    const codeContent = code.match(/module\.exports\s+=\s+(.*?);/)?.[1] || '';
+
+    const moduleData = {
+        code: codeContent,
+        dependencyMap,
+    };
+
+    modules.set(module, moduleData);
+    queueModules.push(...dependencyMap.values());
 };
 
 console.log(chalk.bold(`- Found ${chalk.yellowBright(allFiles.size)} files`));
-console.log("\nFiles:")
-allFiles.forEach(f => console.log(`- ${f}`));
+console.log("\nFiles:");
+console.log(Array.from(allFiles).join('\n- '));
+
+console.log("- \n Serializing bundle");
+
+console.log(...modules);
+
+for (const [module, moduleData] of [...modules].reverse()) {
+    let { code, dependencyMap } = moduleData;
+
+    for (const [dependencyName, dependencyPath] of dependencyMap) {
+        code = code.replace(
+            new RegExp(
+                `require\\(('|")${dependencyName.replace(/[\.\/]/g, '\\$&')}\\1\\)`,
+            ),
+            modules.get(dependencyPath).code
+        )
+    };
+
+    moduleData.code = code;
+}
+
+console.log(modules.get(entryPoint).code)
