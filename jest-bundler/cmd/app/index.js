@@ -1,2 +1,4 @@
-require('./lib2');
-require('./lib3');
+module.exports = (config) => {
+    console.log('app config -> ', config);
+    console.log(require('./lib3'));
+};

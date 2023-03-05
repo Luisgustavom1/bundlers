@@ -1,1 +1,1 @@
-require('../shared/index')
+module.exports = `Lib 2 depends on ${require('../shared/index')}`;
