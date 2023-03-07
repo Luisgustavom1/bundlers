@@ -39,6 +39,7 @@ const resolver = new Resolver.default(moduleMap, {
 const allFiles = new Set();
 const modules = new Map();
 const queueModules = [entryPoint];
+let id = 0;
 
 while(queueModules.length) {
     const module = queueModules.shift();
@@ -60,6 +61,7 @@ while(queueModules.length) {
     const codeContent = code.match(/module\.exports\s+=\s+((.|\n|\r)*);/)?.[1] || '';
 
     const moduleData = {
+        id: id++,
         code: codeContent,
         dependencyMap,
     };
