@@ -1,1 +1,3 @@
-module.exports = `Lib 2 depends on ${require('../shared/index')}`;
+import shared from '../shared/index';
+
+export default `Lib 2 depends on ${shared}`;

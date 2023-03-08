@@ -1,7 +1,11 @@
-const app = require('./app/index');
+import app from './app/index';
+import configs from './configs';
+
 const port = 3000
 
-module.exports = { 
-    app: app(require('./configs')), 
-    port 
-};
+export default { 
+    app: app({
+        options: configs,
+        port
+    }), 
+}

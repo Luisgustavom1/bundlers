@@ -1,4 +1,8 @@
-module.exports = (config) => {
+import lib3 from './lib3';
+
+const app = (config) => {
     console.log('app config -> ', config);
-    console.log(require('./lib3'));
-};
+    console.log(lib3);
+}
+
+export default app;

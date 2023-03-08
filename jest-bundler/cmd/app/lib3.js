@@ -1,1 +1,3 @@
-module.exports = "lib 3 -> " + require('./lib2');
+import lib2 from './lib2';
+
+export default "lib 3 -> " + lib2;
