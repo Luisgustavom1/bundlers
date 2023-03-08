@@ -4,17 +4,11 @@ import fs from 'fs';
 import Resolver from 'jest-resolve';
 import JestHasteMap from 'jest-haste-map';
 import chalk from 'chalk';
-import yargs from 'yargs';
 import { transformSync } from '@babel/core';
 import { minify } from "terser";
+import { ARGS } from './tools/flags.js';
 
-const FLAGS = {
-    ENTRYPOINT: 'entryPoint',
-    MINIFY: 'minify',
-    OUTPUT: 'output',
-}
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "cmd");
+const root = join(dirname(fileURLToPath(import.meta.url)), "example");
  
 const hasteMapOptions = {
     name: 'jest-bundler',
@@ -29,14 +23,11 @@ await hasteMap.setupCachePath(hasteMapOptions);
 
 const { hasteFS, moduleMap } = await hasteMap.build();
 
-const args = yargs(process.argv).argv;
-const entryPoint = args[FLAGS.ENTRYPOINT];
-
-if (!hasteFS.exists(entryPoint)) {
+if (!hasteFS.exists(ARGS.entryPoint)) {
     throw new Error("Entry point file does not exist.")
 }
 
-console.log(chalk.bold(`- 🔥🔥🔥 Building ${chalk.yellowBright(entryPoint)}`));
+console.log(chalk.bold(`- 🔥🔥🔥 Building ${chalk.yellowBright(ARGS.entryPoint)}`));
 
 const resolver = new Resolver.default(moduleMap, {
     extensions: ['.js'],
@@ -46,7 +37,7 @@ const resolver = new Resolver.default(moduleMap, {
 
 const allFiles = new Set();
 const modules = new Map();
-const queueModules = [entryPoint];
+const queueModules = [ARGS.entryPoint];
 let id = 0;
 
 while(queueModules.length) {
@@ -118,11 +109,10 @@ const output = [
 
 let codeOutput = output.join('\n');
 
-if (args[FLAGS.MINIFY]) {
+if (ARGS.minify) {
     codeOutput = (await minify(codeOutput, { compress: true, mangle: true })).code;
 } 
 
-const outputFile = args[FLAGS.OUTPUT];
-if (outputFile) {
-    fs.writeFileSync(outputFile, codeOutput, 'utf-8');
+if (ARGS.output) {
+    fs.writeFileSync(ARGS.output, codeOutput, 'utf-8');
 }
