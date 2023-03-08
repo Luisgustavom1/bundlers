@@ -6,6 +6,7 @@ import JestHasteMap from 'jest-haste-map';
 import chalk from 'chalk';
 import yargs from 'yargs';
 import { transformSync } from '@babel/core';
+import { minify } from "terser";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "cmd");
  
@@ -111,6 +112,8 @@ const output = [
 
 const outputFile = args.output;
 
+const { code: codeMinified } = await minify(output.join('\n'), { compress: true, mangle: true });
+
 if (outputFile) {
-    fs.writeFileSync(outputFile, output.join('\n'), 'utf-8');
+    fs.writeFileSync(outputFile, codeMinified, 'utf-8');
 }
