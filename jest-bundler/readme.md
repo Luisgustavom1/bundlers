@@ -16,7 +16,7 @@ node test.js
 
 &#9744;  Add cache
 
-&#9744;  Add minify flags
+&#9745;  Add minify flags
 
 &#9744;  Implements HTTP server 
 
