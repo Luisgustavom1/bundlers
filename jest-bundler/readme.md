@@ -1,3 +1,5 @@
+See [test.js](/test.js) to see code result
+
 To bundle our code
 ```bash
 node index.js --entryPoint cmd/index.js --output test.js
