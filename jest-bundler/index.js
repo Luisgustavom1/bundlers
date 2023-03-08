@@ -58,11 +58,11 @@ while(queueModules.length) {
 
     const code = fs.readFileSync(module, 'utf-8');
     
-    const codeContent = code.match(/module\.exports\s+=\s+((.|\n|\r)*);/)?.[1] || '';
+    // const codeContent = code.match(/module\.exports\s+=\s+((.|\n|\r)*);/)?.[1] || '';
 
     const moduleData = {
         id: id++,
-        code: codeContent,
+        code,
         dependencyMap,
     };
 
@@ -74,23 +74,32 @@ console.log(chalk.bold(`- Found ${chalk.yellowBright(allFiles.size)} files`));
 console.log("\nFiles:");
 console.log(Array.from(allFiles).join('\n- '));
 
-console.log("- \n Serializing bundle");
+console.log(chalk.bold("\n- Serializing bundle"));
 
-console.log(...modules);
+const wrapOutputModule = (id, code) => `define(${id}, function(module, exports, require) {\n${code}})`; 
 
+const output = [];
 for (const [module, moduleData] of [...modules].reverse()) {
-    let { code, dependencyMap } = moduleData;
+    let { code, dependencyMap, id } = moduleData;
 
     for (const [dependencyName, dependencyPath] of dependencyMap) {
+        const dependency = modules.get(dependencyPath);
         code = code.replace(
             new RegExp(
                 `require\\(('|")${dependencyName.replace(/[\.\/]/g, '\\$&')}\\1\\)`,
             ),
-            modules.get(dependencyPath).code
+            `require(${dependency.id})`
         )
     };
 
-    moduleData.code = code;
+    output.push(wrapOutputModule(id, code));
 }
 
-console.log(modules.get(entryPoint).code)
+output.unshift(fs.readFileSync('./require.js', 'utf-8'));
+output.push([`requireModule(0);`])
+
+const outputFile = args.output;
+
+if (outputFile) {
+    fs.writeFileSync(outputFile, output.join('\n'), 'utf-8');
+}
