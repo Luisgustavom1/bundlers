@@ -8,6 +8,12 @@ import yargs from 'yargs';
 import { transformSync } from '@babel/core';
 import { minify } from "terser";
 
+const FLAGS = {
+    ENTRYPOINT: 'entryPoint',
+    MINIFY: 'minify',
+    OUTPUT: 'output',
+}
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "cmd");
  
 const hasteMapOptions = {
@@ -24,7 +30,7 @@ await hasteMap.setupCachePath(hasteMapOptions);
 const { hasteFS, moduleMap } = await hasteMap.build();
 
 const args = yargs(process.argv).argv;
-const entryPoint = args.entryPoint;
+const entryPoint = args[FLAGS.ENTRYPOINT];
 
 if (!hasteFS.exists(entryPoint)) {
     throw new Error("Entry point file does not exist.")
@@ -110,10 +116,13 @@ const output = [
     `requireModule(0);`
 ]
 
-const outputFile = args.output;
+let codeOutput = output.join('\n');
 
-const { code: codeMinified } = await minify(output.join('\n'), { compress: true, mangle: true });
+if (args[FLAGS.MINIFY]) {
+    codeOutput = (await minify(codeOutput, { compress: true, mangle: true })).code;
+} 
 
+const outputFile = args[FLAGS.OUTPUT];
 if (outputFile) {
-    fs.writeFileSync(outputFile, codeMinified, 'utf-8');
+    fs.writeFileSync(outputFile, codeOutput, 'utf-8');
 }
