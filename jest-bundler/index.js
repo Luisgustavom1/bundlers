@@ -5,6 +5,7 @@ import Resolver from 'jest-resolve';
 import JestHasteMap from 'jest-haste-map';
 import chalk from 'chalk';
 import yargs from 'yargs';
+import { transformSync } from '@babel/core';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "cmd");
  
@@ -78,25 +79,35 @@ console.log(chalk.bold("\n- Serializing bundle"));
 
 const wrapOutputModule = (id, code) => `define(${id}, function(module, exports, require) {\n${code}})`; 
 
-const output = [];
-for (const [module, moduleData] of [...modules].reverse()) {
-    let { code, dependencyMap, id } = moduleData;
+const results = await Promise.all(
+    Array.from(modules)
+        .reverse()
+        .map(async ([_, moduleData]) => {
+            let { code, dependencyMap, id } = moduleData;
 
-    for (const [dependencyName, dependencyPath] of dependencyMap) {
-        const dependency = modules.get(dependencyPath);
-        code = code.replace(
-            new RegExp(
-                `require\\(('|")${dependencyName.replace(/[\.\/]/g, '\\$&')}\\1\\)`,
-            ),
-            `require(${dependency.id})`
-        )
-    };
+            code = transformSync(code, {
+                plugins: ["@babel/plugin-transform-modules-commonjs"]
+            }).code
 
-    output.push(wrapOutputModule(id, code));
-}
+            for (const [dependencyName, dependencyPath] of dependencyMap) {
+                const dependency = modules.get(dependencyPath);
+                code = code.replace(
+                    new RegExp(
+                        `require\\(('|")${dependencyName.replace(/[\.\/]/g, '\\$&')}\\1\\)`,
+                    ),
+                    `require(${dependency.id})`
+                )
+            };
 
-output.unshift(fs.readFileSync('./require.js', 'utf-8'));
-output.push([`requireModule(0);`])
+            return wrapOutputModule(id, code);
+        })
+)
+
+const output = [
+    fs.readFileSync('./require.js', 'utf-8'),
+    ...results,
+    `requireModule(0);`
+]
 
 const outputFile = args.output;
 

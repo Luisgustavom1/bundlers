@@ -13,5 +13,9 @@
     "jest-haste-map": "^29.4.3",
     "jest-resolve": "^29.4.3",
     "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.21.2"
   }
 }
