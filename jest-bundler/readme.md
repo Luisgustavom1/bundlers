@@ -1,4 +1,4 @@
-- [tutorial](https://cpojer.net/posts/building-a-javascript-bundler)
+- [Tutorial](https://cpojer.net/posts/building-a-javascript-bundler)
 
 See [test.js](./test.js) to see code result
 
