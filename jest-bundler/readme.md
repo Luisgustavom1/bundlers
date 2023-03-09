@@ -14,6 +14,8 @@ node test.js
 
 ## Todos
 
+&#9744;  Separate responsibilities
+
 &#9745;  Add workers
 
 &#9744;  Add cache
