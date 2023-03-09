@@ -1,3 +1,5 @@
+- [tutorial](https://cpojer.net/posts/building-a-javascript-bundler)
+
 See [test.js](./test.js) to see code result
 
 To bundle our code
@@ -12,7 +14,7 @@ node test.js
 
 ## Todos
 
-&#9744;  Add workers
+&#9745;  Add workers
 
 &#9744;  Add cache
 
