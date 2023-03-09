@@ -1,13 +1,15 @@
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
+import { dirname, join } from 'node:path';
+import { hrtime } from 'node:process';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
+import { Worker } from 'jest-worker';
 import Resolver from 'jest-resolve';
 import JestHasteMap from 'jest-haste-map';
 import chalk from 'chalk';
-import { transformSync } from '@babel/core';
 import { minify } from "terser";
-import { ARGS } from './tools/flags.js';
+import { ARGS } from './tools/cli.js';
 
+const start = hrtime.bigint();
 const root = join(dirname(fileURLToPath(import.meta.url)), "example");
  
 const hasteMapOptions = {
@@ -74,8 +76,14 @@ console.log("\nFiles:");
 console.log(Array.from(allFiles).join('\n- '));
 
 console.log(chalk.bold("\n- Serializing bundle"));
-
 const wrapOutputModule = (id, code) => `define(${id}, function(module, exports, require) {\n${code}})`; 
+
+const worker = new Worker(
+    new URL('./tools/worker.cjs', import.meta.url),
+    {
+        enableWorkerThreads: true
+    }
+)
 
 const results = await Promise.all(
     Array.from(modules)
@@ -83,9 +91,7 @@ const results = await Promise.all(
         .map(async ([_, moduleData]) => {
             let { code, dependencyMap, id } = moduleData;
 
-            code = transformSync(code, {
-                plugins: ["@babel/plugin-transform-modules-commonjs"]
-            }).code
+            ({ code } = await worker.transformFile(code));
 
             for (const [dependencyName, dependencyPath] of dependencyMap) {
                 const dependency = modules.get(dependencyPath);
@@ -102,7 +108,7 @@ const results = await Promise.all(
 )
 
 const output = [
-    fs.readFileSync('./require.js', 'utf-8'),
+    fs.readFileSync('./tools/runtime.js', 'utf-8'),
     ...results,
     `requireModule(0);`
 ]
@@ -116,3 +122,7 @@ if (ARGS.minify) {
 if (ARGS.output) {
     fs.writeFileSync(ARGS.output, codeOutput, 'utf-8');
 }
+
+worker.end();
+const end = hrtime.bigint();
+console.log(chalk.green(`Generate build successfully in ${end - start} nanoseconds`));
