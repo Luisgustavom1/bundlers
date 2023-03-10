@@ -1,6 +1,6 @@
 const { transformSync } =  require("@babel/core");
 
-exports.transformFile = function (code) {
+exports.transformESMFiles = function (code) {
     const transformResult = { code: '', errorMessage: '' };
 
     try {

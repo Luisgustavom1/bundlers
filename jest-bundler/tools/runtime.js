@@ -1,9 +1,10 @@
 const modules = new Map();
+const moduleCache = new Map();
+
 const define = (name, moduleFactory) => {
     modules.set(name, moduleFactory);
 }
 
-const moduleCache = new Map();
 const requireModule = (name) => {
     if (moduleCache.has(name)) {
         return modules.get(name).exports;
