@@ -14,7 +14,7 @@ node test.js
 
 ## Todos
 
-&#9744;  Separate responsibilities
+&#9745;  Separate responsibilities
 
 &#9745;  Add workers
 
