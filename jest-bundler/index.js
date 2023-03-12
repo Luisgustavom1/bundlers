@@ -6,6 +6,7 @@ import { minify } from "terser";
 import { ARGS } from './tools/cli.js';
 import { generateModuleMap } from './tools/moduleMap.js';
 import { generateBundle } from './tools/bundler.js';
+import { DIR, fromRootDir } from './dir.js';
 
 const start = hrtime.bigint();
 
@@ -13,7 +14,7 @@ console.log(chalk.bold(`- 🔥🔥🔥 Building ${chalk.yellowBright(ARGS.entryP
 const modules = await generateModuleMap(ARGS.entryPoint);
 
 const worker = new Worker(
-    new URL('./tools/worker.cjs', import.meta.url),
+    new URL(fromRootDir(DIR.TOOLS, 'worker.cjs'), import.meta.url),
     {
         enableWorkerThreads: true
     }
@@ -23,7 +24,7 @@ console.log(chalk.bold("\n- Serializing bundle"));
 const results = await generateBundle(modules, worker.transformESMFiles);
 
 const output = [
-    fs.readFileSync('./tools/runtime.js', 'utf-8'),
+    fs.readFileSync(fromRootDir(DIR.TOOLS, 'runtime.js'), 'utf-8'),
     ...results,
     `requireModule(0);`
 ]
