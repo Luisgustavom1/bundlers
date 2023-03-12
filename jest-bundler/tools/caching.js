@@ -4,7 +4,7 @@ import md5 from 'crypto-js/md5.js';
 import { DIR, fromRootDir } from "../dir.js";
 
 
-export function writeCache(moduleName) {
+export function readCache(moduleName) {
     try {
         const contentCached = fs.readFileSync(fromRootDir(DIR.CACHE, md5(moduleName).toString()), 'utf8');
         return contentCached;

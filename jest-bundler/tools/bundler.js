@@ -1,11 +1,11 @@
-import { writeCache, writeCache } from "./caching.js";
+import { readCache, writeCache } from "./caching.js";
 
 export const generateBundle = async (modules, transformESMFileWorker) => {
     return await Promise.all(
         Array.from(modules)
             .reverse()
             .map(async ([modulePath, moduleData]) => {
-                const moduleCached = writeCache(modulePath);
+                const moduleCached = readCache(modulePath);
                 if (moduleCached) {
                     return moduleCached;
                 }
