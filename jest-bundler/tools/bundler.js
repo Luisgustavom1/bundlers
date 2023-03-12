@@ -5,12 +5,14 @@ export const generateBundle = async (modules, transformESMFileWorker) => {
         Array.from(modules)
             .reverse()
             .map(async ([modulePath, moduleData]) => {
-                const moduleCached = readCache(modulePath);
+                let { code, dependencyMap, id } = moduleData;
+                const originalCode = code;
+
+                const moduleCached = readCache(originalCode);
+                // TODO: remove old cached
                 if (moduleCached) {
                     return moduleCached;
                 }
-
-                let { code, dependencyMap, id } = moduleData;
                 
                 ({ code } = await transformESMFileWorker(code));
     
@@ -25,7 +27,7 @@ export const generateBundle = async (modules, transformESMFileWorker) => {
                 };
                 
                 const outputModule = wrapOutputModule(id, code);
-                writeCache(modulePath, outputModule);
+                writeCache(originalCode, outputModule);
 
                 return outputModule;
             })
