@@ -1,10 +1,17 @@
+import { writeCache, writeCache } from "./caching.js";
+
 export const generateBundle = async (modules, transformESMFileWorker) => {
     return await Promise.all(
         Array.from(modules)
             .reverse()
-            .map(async ([_, moduleData]) => {
+            .map(async ([modulePath, moduleData]) => {
+                const moduleCached = writeCache(modulePath);
+                if (moduleCached) {
+                    return moduleCached;
+                }
+
                 let { code, dependencyMap, id } = moduleData;
-    
+                
                 ({ code } = await transformESMFileWorker(code));
     
                 for (const [dependencyName, dependencyPath] of dependencyMap) {
@@ -16,8 +23,11 @@ export const generateBundle = async (modules, transformESMFileWorker) => {
                         `require(${dependency.id})`
                     )
                 };
-    
-                return wrapOutputModule(id, code);
+                
+                const outputModule = wrapOutputModule(id, code);
+                writeCache(modulePath, outputModule);
+
+                return outputModule;
             })
     )    
 }
