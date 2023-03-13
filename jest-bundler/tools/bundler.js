@@ -8,7 +8,7 @@ export const generateBundle = async (modules, transformESMFileWorker) => {
                 let { code, dependencyMap, id } = moduleData;
                 const originalCode = code;
 
-                const moduleCached = readCache(originalCode, id);
+                const moduleCached = await readCache(originalCode, id);
                 if (moduleCached) {
                     return moduleCached;
                 }
