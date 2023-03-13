@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "start": "node test.js",
+    "build": "node index.js --entryPoint example/cmd/index.js --output test.js --minify"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
