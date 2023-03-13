@@ -1,19 +1,25 @@
 import path from 'node:path';
 import fs from 'node:fs';
+// In v18 node version zlib still experimental
+import zlib from 'node:zlib';
 import md5 from 'crypto-js/md5.js';
 import { DIR, fromRootDir } from "../dir.js";
 
-
 export function readCache(moduleName, prefix) {
     try {
-        const contentCached = fs.readFileSync(fromRootDir(DIR.CACHE, `${prefix}-${md5(moduleName).toString()}`), 'utf8');
-        return contentCached;
-    } catch {
+        const contentCached = fs.readFileSync(
+            fromRootDir(DIR.CACHE, `${prefix}-${md5(moduleName).toString()}`), 
+            'base64'
+        );
+        const contentUnzip = zlib.unzipSync(Buffer.from(contentCached, 'base64'));
+
+        return contentUnzip.toString();
+    } catch (error) {
         return undefined;
     }
 }
 
-export function writeCache(moduleName, content, prefix) {
+export async function writeCache(moduleName, content, prefix) {
     const cacheDir = fromRootDir(DIR.CACHE);
 
     if (!fs.existsSync(cacheDir)) {
@@ -29,5 +35,12 @@ export function writeCache(moduleName, content, prefix) {
         }
     }
 
-    fs.writeFileSync(path.join(cacheDir, `${prefix}-${md5(moduleName).toString()}`), content, 'utf-8');
+    const contentCompressed = zlib.gzipSync(content);
+
+    fs.writeFile(
+        path.join(cacheDir, `${prefix}-${md5(moduleName).toString()}`), 
+        contentCompressed.toString('base64'), 
+        'base64',
+        () => {}
+    );
 }
