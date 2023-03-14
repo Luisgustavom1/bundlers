@@ -4,6 +4,7 @@ Repository to study how bundlers and compilers work behind the scenes.
 #### Practices
 
 - [Simple bundler in js](/simple-js-bundler)
+- [Complete bundler with jest](/jest-bundler)
 
 ##### References:
   - [Demystifying bundlers](https://rena.to/blog/demystifying-bundlers)
