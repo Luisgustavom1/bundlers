@@ -42,7 +42,7 @@ export async function writeCache(moduleName, content, prefix) {
 
     const contentCompressed = await gzip(content);
 
-    await fs.writeFile(
+    fs.writeFile(
         path.join(cacheDir, `${prefix}-${md5(moduleName).toString()}`), 
         contentCompressed.toString('base64'), 
         'base64',

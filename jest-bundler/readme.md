@@ -18,7 +18,7 @@ node test.js
 
 &#9745;  Add workers
 
-&#9744;  Add cache
+&#9745;  Add cache
 
 &#9745;  Add minify flags
 
