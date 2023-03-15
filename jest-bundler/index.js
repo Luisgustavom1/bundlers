@@ -37,18 +37,22 @@ import path from 'node:path';
     };
 
     if (ARGS.minify) {
-        const minifiedCode = await minify(codeOutput.code, { sourceMap: true });
+        const minifiedCode = await minify(
+            codeOutput.code, { 
+                sourceMap: {
+                    filename: ARGS.output,
+                    url: ARGS.output + '.map'
+                } 
+            });
 
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
     } 
 
     if (ARGS.output) {
-        fs.writeFileSync(path.join('dist', ARGS.output), codeOutput.code, 'utf-8');
-
+        fs.writeFileSync(path.join(DIR.DIST, ARGS.output), codeOutput.code, 'utf-8');
         if (!codeOutput.map) return;
-
-        fs.writeFileSync(`${path.join('dist', ARGS.output)}.map`, codeOutput.map, 'utf-8');
+        fs.writeFileSync(`${path.join(DIR.DIST, ARGS.output)}.map`, codeOutput.map, 'utf-8');
     }
 
     worker.end();

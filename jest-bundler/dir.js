@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 export const DIR = {
     CACHE: 'temp',
     TOOLS: 'tools',
+    DIST: 'dist',
     ROOT: path.dirname(fileURLToPath(import.meta.url)),
 }
 
