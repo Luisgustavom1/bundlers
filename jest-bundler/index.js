@@ -26,13 +26,22 @@ import path from 'node:path';
     const results = await generateBundle(modules, worker.transformESMFiles);
 
     const output = [
-        fs.readFileSync(fromRootDir(DIR.TOOLS, 'runtime.js'), 'utf-8'),
+        {
+            path: 'runtime.js',
+            code: fs.readFileSync(fromRootDir(DIR.TOOLS, 'runtime.js'), 'utf-8')
+        },
         ...results,
-        `requireModule(0);`
-    ]
+        {
+            path: 'entrypoint.js',
+            code: `requireModule(0);`
+        }
+    ].reduce((acc, { path, code }) => ({
+        ...acc,
+        [path]: code
+    }), {});
 
     const codeOutput = {
-        code: output.join('\n'),
+        code: output,
         map: undefined
     };
 
