@@ -36,6 +36,7 @@ import path from 'node:path';
         map: undefined
     };
 
+    // TODO: create DIST directory when its doesn't exists
     if (ARGS.minify) {
         const minifiedCode = await minify(
             codeOutput.code, { 
@@ -47,13 +48,11 @@ import path from 'node:path';
 
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
-    } 
 
-    if (ARGS.output) {
-        fs.writeFileSync(path.join(DIR.DIST, ARGS.output), codeOutput.code, 'utf-8');
-        if (!codeOutput.map) return;
         fs.writeFileSync(`${path.join(DIR.DIST, ARGS.output)}.map`, codeOutput.map, 'utf-8');
-    }
+    } 
+    
+    fs.writeFileSync(path.join(DIR.DIST, ARGS.output), codeOutput.code, 'utf-8');
 
     worker.end();
     const end = hrtime.bigint();
