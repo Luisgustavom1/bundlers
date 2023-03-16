@@ -6,7 +6,9 @@ const FLAGS = {
     OUTPUT: 'output',
 }
 
-const args = yargs(process.argv).argv;
+const args = yargs(process.argv)
+    .default('output', 'index.js')
+    .argv;
 
 const ARGS = {
     entryPoint: args[FLAGS.ENTRYPOINT],
