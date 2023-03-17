@@ -45,8 +45,8 @@ import { existsSync } from 'node:fs';
         map: undefined
     };
 
-    if (!existsSync(DIR.dist)) {
-        await fs.mkdir(DIR.dist);
+    if (!existsSync(DIR.build)) {
+        await fs.mkdir(DIR.build);
     }
 
     if (ARGS.minify) {
@@ -61,10 +61,10 @@ import { existsSync } from 'node:fs';
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
 
-        await fs.writeFile(`${path.join(DIR.dist, ARGS.output)}.map`, codeOutput.map, 'utf-8');
+        await fs.writeFile(`${path.join(DIR.build, ARGS.output)}.map`, codeOutput.map, 'utf-8');
     } 
     
-    await fs.writeFile(path.join(DIR.dist, ARGS.output), codeOutput.code, 'utf-8');
+    await fs.writeFile(path.join(DIR.build, ARGS.output), codeOutput.code, 'utf-8');
 
     worker.end();
     const end = hrtime.bigint();

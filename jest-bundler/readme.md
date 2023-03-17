@@ -1,3 +1,5 @@
+Simple bundle with jest to bundle your js code, with some functionality as cache, source map, minify, hot reload and server.
+
 - [Tutorial](https://cpojer.net/posts/building-a-javascript-bundler)
 
 See [test.js](./test.js) to see code result
