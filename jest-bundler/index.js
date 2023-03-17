@@ -1,13 +1,15 @@
 import { hrtime } from 'node:process';
-import fs from 'node:fs';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { Worker } from 'jest-worker';
 import chalk from 'chalk';
 import { minify } from "terser";
 import { ARGS } from './tools/cli.js';
+import { convertOutputArrayToObj } from './share/object.js';
 import { generateModuleMap } from './tools/moduleMap.js';
 import { generateBundle } from './tools/bundler.js';
-import { DIR, fromRootDir } from './dir.js';
-import path from 'node:path';
+import { DIR, fromRootDir } from './dirs.js';
+import { existsSync } from 'node:fs';
 
 (async () => {
     const start = hrtime.bigint();
@@ -16,7 +18,7 @@ import path from 'node:path';
     const modules = await generateModuleMap(ARGS.entryPoint);
 
     const worker = new Worker(
-        new URL(fromRootDir(DIR.TOOLS, 'worker.cjs'), import.meta.url),
+        new URL(fromRootDir(DIR.tools, 'worker.cjs'), import.meta.url),
         {
             enableWorkerThreads: true
         }
@@ -25,27 +27,28 @@ import path from 'node:path';
     console.log(chalk.bold("\n- Serializing bundle"));
     const results = await generateBundle(modules, worker.transformESMFiles);
 
+    const runtimeCode = await fs.readFile(fromRootDir(DIR.tools, 'runtime.js'), 'utf-8');
     const output = [
         {
             path: 'runtime.js',
-            code: fs.readFileSync(fromRootDir(DIR.TOOLS, 'runtime.js'), 'utf-8')
+            code: runtimeCode,
         },
         ...results,
         {
             path: 'entrypoint.js',
-            code: `requireModule(0);`
+            code: `requireModule(0);`,
         }
-    ].reduce((acc, { path, code }) => ({
-        ...acc,
-        [path]: code
-    }), {});
+    ]
 
     const codeOutput = {
-        code: output,
+        code: convertOutputArrayToObj(output),
         map: undefined
     };
 
-    // TODO: create DIST directory when its doesn't exists
+    if (!existsSync(DIR.dist)) {
+        await fs.mkdir(DIR.dist);
+    }
+
     if (ARGS.minify) {
         const minifiedCode = await minify(
             codeOutput.code, { 
@@ -58,10 +61,10 @@ import path from 'node:path';
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
 
-        fs.writeFileSync(`${path.join(DIR.DIST, ARGS.output)}.map`, codeOutput.map, 'utf-8');
+        await fs.writeFile(`${path.join(DIR.dist, ARGS.output)}.map`, codeOutput.map, 'utf-8');
     } 
     
-    fs.writeFileSync(path.join(DIR.DIST, ARGS.output), codeOutput.code, 'utf-8');
+    await fs.writeFile(path.join(DIR.dist, ARGS.output), codeOutput.code, 'utf-8');
 
     worker.end();
     const end = hrtime.bigint();

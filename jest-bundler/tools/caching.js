@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 // In v18 node version zlib still experimental
 import zlib from 'node:zlib';
 import md5 from 'crypto-js/md5.js';
-import { DIR, fromRootDir } from "../dir.js";
+import { DIR, fromRootDir } from "../dirs.js";
 import { promisify } from 'node:util';
 
 const unzip = promisify(zlib.unzip)
@@ -13,7 +13,7 @@ const gzip = promisify(zlib.gzip)
 export async function readCache(moduleName, prefix) {
     try {
         const contentCached = await fs.readFile(
-            fromRootDir(DIR.CACHE, `${prefix}-${md5(moduleName).toString()}`), 
+            fromRootDir(DIR.cache, `${prefix}-${md5(moduleName).toString()}`), 
             'base64'
         );
         const contentUnzip = (await unzip(Buffer.from(contentCached, 'base64'))).toString();
@@ -25,7 +25,7 @@ export async function readCache(moduleName, prefix) {
 }
 
 export async function writeCache(moduleName, content, prefix) {
-    const cacheDir = fromRootDir(DIR.CACHE);
+    const cacheDir = fromRootDir(DIR.cache);
 
     if (!existsSync(cacheDir)) {
         await fs.mkdir(cacheDir);
