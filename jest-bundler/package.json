@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node out/test.js",
-    "build": "node index.js --entryPoint example/cmd/index.js --output test.js --minify"
+    "build": "node index.js --entryPoint example/cmd/index.js --outFile index.js --minify"
   },
   "keywords": [],
   "author": "",

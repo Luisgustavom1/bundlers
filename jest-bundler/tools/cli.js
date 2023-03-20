@@ -1,19 +1,20 @@
 import yargs from 'yargs';
 
 const FLAGS = {
-    ENTRYPOINT: 'entryPoint',
-    MINIFY: 'minify',
-    OUTPUT: 'output',
+    entryPoint: 'entryPoint',
+    minify: 'minify',
+    outFile: 'outFile',
 }
 
 const args = yargs(process.argv)
-    .default('output', 'index.js')
+    .default('outFile', 'index.js')
+    .default('outDir', '.')
     .argv;
 
 const ARGS = {
-    entryPoint: args[FLAGS.ENTRYPOINT],
-    output: args[FLAGS.OUTPUT],
-    minify: args[FLAGS.MINIFY],
+    entryPoint: args[FLAGS.entryPoint],
+    outFile: args[FLAGS.outFile],
+    minify: args[FLAGS.minify],
 }
 
 export { ARGS }

@@ -45,26 +45,26 @@ import { existsSync } from 'node:fs';
         map: undefined
     };
 
-    if (!existsSync(DIR.build)) {
-        await fs.mkdir(DIR.build);
+    if (!existsSync(fromRootDir(DIR.build))) {
+        await fs.mkdir(fromRootDir(DIR.build));
     }
 
     if (ARGS.minify) {
         const minifiedCode = await minify(
             codeOutput.code, { 
                 sourceMap: {
-                    filename: ARGS.output,
-                    url: ARGS.output + '.map'
+                    filename: ARGS.outFile,
+                    url: ARGS.outFile + '.map'
                 } 
             });
 
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
 
-        await fs.writeFile(`${path.join(DIR.build, ARGS.output)}.map`, codeOutput.map, 'utf-8');
+        await fs.writeFile(`${fromRootDir(DIR.build, ARGS.outFile)}.map`, codeOutput.map, 'utf-8');
     } 
     
-    await fs.writeFile(path.join(DIR.build, ARGS.output), codeOutput.code, 'utf-8');
+    await fs.writeFile(fromRootDir(DIR.build, ARGS.outFile), codeOutput.code, 'utf-8');
 
     worker.end();
     const end = hrtime.bigint();
