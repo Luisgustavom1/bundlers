@@ -4,6 +4,7 @@ const FLAGS = {
     entryPoint: 'entryPoint',
     minify: 'minify',
     outFile: 'outFile',
+    outDir: 'outDir'
 }
 
 const args = yargs(process.argv)
@@ -14,6 +15,7 @@ const args = yargs(process.argv)
 const ARGS = {
     entryPoint: args[FLAGS.entryPoint],
     outFile: args[FLAGS.outFile],
+    outDir: args[FLAGS.outDir],
     minify: args[FLAGS.minify],
 }
 

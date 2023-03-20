@@ -8,7 +8,7 @@ import { ARGS } from './tools/cli.js';
 import { convertOutputArrayToObj } from './share/object.js';
 import { generateModuleMap } from './tools/moduleMap.js';
 import { generateBundle } from './tools/bundler.js';
-import { DIR, fromRootDir } from './dirs.js';
+import { DIR, fromOutDir, fromRootDir } from './dirs.js';
 import { existsSync } from 'node:fs';
 
 (async () => {
@@ -45,8 +45,8 @@ import { existsSync } from 'node:fs';
         map: undefined
     };
 
-    if (!existsSync(fromRootDir(DIR.build))) {
-        await fs.mkdir(fromRootDir(DIR.build));
+    if (!existsSync(fromOutDir(DIR.build))) {
+        await fs.mkdir(fromOutDir(DIR.build));
     }
 
     if (ARGS.minify) {
@@ -61,10 +61,10 @@ import { existsSync } from 'node:fs';
         codeOutput.code = minifiedCode.code;
         codeOutput.map = minifiedCode.map;
 
-        await fs.writeFile(`${fromRootDir(DIR.build, ARGS.outFile)}.map`, codeOutput.map, 'utf-8');
+        await fs.writeFile(`${fromOutDir(DIR.build, ARGS.outFile)}.map`, codeOutput.map, 'utf-8');
     } 
     
-    await fs.writeFile(fromRootDir(DIR.build, ARGS.outFile), codeOutput.code, 'utf-8');
+    await fs.writeFile(fromOutDir(DIR.build, ARGS.outFile), codeOutput.code, 'utf-8');
 
     worker.end();
     const end = hrtime.bigint();
